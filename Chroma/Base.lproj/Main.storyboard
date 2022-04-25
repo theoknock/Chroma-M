@@ -1,24 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BV1-FR-VrT">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="v3F-VA-2H7">
+    <device id="retina6_1" orientation="landscape" appearance="dark"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Game View Controller-->
-        <scene sceneID="tXr-a1-R10">
+        <!--View Controller-->
+        <scene sceneID="A6E-wk-R3P">
             <objects>
-                <viewController id="BV1-FR-VrT" customClass="GameViewController" customModuleProvider="" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="3se-qz-xqx" customClass="MTKView">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                <viewController id="v3F-VA-2H7" customClass="ViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Lps-Xh-Cj1">
+                        <rect key="frame" x="0.0" y="0.0" width="896" height="414"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" xcode11CocoaTouchSystemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
-                        <viewLayoutGuide key="safeArea" id="rZh-zQ-HcR"/>
+                        <subviews>
+                            <mtkView contentMode="scaleToFill" colorPixelFormat="BGRA8Unorm" depthStencilPixelFormat="Depth32Float" paused="YES" enableSetNeedsDisplay="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SUj-s8-6hC">
+                                <rect key="frame" x="44" y="0.0" width="808" height="393"/>
+                            </mtkView>
+                            <view opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WQ1-3Z-YBb" customClass="ControlView">
+                                <rect key="frame" x="459" y="0.0" width="393" height="393"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="WQ1-3Z-YBb" secondAttribute="height" multiplier="1:1" id="jGR-XU-iNA"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="cvH-CB-P4o"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="SUj-s8-6hC" firstAttribute="leading" secondItem="cvH-CB-P4o" secondAttribute="leading" id="1dJ-Kz-9ei"/>
+                            <constraint firstItem="SUj-s8-6hC" firstAttribute="top" secondItem="cvH-CB-P4o" secondAttribute="top" id="6Cd-Ua-Ko0"/>
+                            <constraint firstItem="SUj-s8-6hC" firstAttribute="width" secondItem="cvH-CB-P4o" secondAttribute="width" id="9sP-Tv-4CT"/>
+                            <constraint firstItem="WQ1-3Z-YBb" firstAttribute="width" secondItem="cvH-CB-P4o" secondAttribute="width" id="DCZ-7B-VgL"/>
+                            <constraint firstItem="WQ1-3Z-YBb" firstAttribute="trailing" secondItem="cvH-CB-P4o" secondAttribute="trailing" id="Mus-Z0-JtN"/>
+                            <constraint firstItem="SUj-s8-6hC" firstAttribute="bottom" secondItem="cvH-CB-P4o" secondAttribute="bottom" id="N2L-vt-b1p"/>
+                            <constraint firstItem="WQ1-3Z-YBb" firstAttribute="height" secondItem="cvH-CB-P4o" secondAttribute="height" identifier="ControlViewLandscapeHeighConstraint" id="Txw-A8-Wak"/>
+                            <constraint firstItem="SUj-s8-6hC" firstAttribute="trailing" secondItem="cvH-CB-P4o" secondAttribute="trailing" id="oRS-30-71N"/>
+                            <constraint firstItem="WQ1-3Z-YBb" firstAttribute="bottom" secondItem="cvH-CB-P4o" secondAttribute="bottom" id="sYT-tB-9Lf"/>
+                        </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="DCZ-7B-VgL"/>
+                                <exclude reference="Txw-A8-Wak"/>
+                            </mask>
+                        </variation>
+                        <variation key="heightClass=compact-widthClass=regular">
+                            <mask key="constraints">
+                                <include reference="Txw-A8-Wak"/>
+                            </mask>
+                        </variation>
+                        <variation key="heightClass=regular-widthClass=compact">
+                            <mask key="constraints">
+                                <include reference="DCZ-7B-VgL"/>
+                            </mask>
+                        </variation>
                     </view>
+                    <connections>
+                        <outlet property="ControlView" destination="WQ1-3Z-YBb" id="1MK-uH-mPi"/>
+                        <outlet property="mtkView" destination="SUj-s8-6hC" id="PE5-Wk-K5X"/>
+                    </connections>
                 </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="pCw-sV-Blr" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="-97" y="80"/>
         </scene>
     </scenes>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
 </document>

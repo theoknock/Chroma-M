@@ -1,17 +1,23 @@
 //
 //  Renderer.h
-//  Chroma
+//  TextureTest
 //
-//  Created by Xcode Developer on 4/23/22.
+//  Created by Xcode Developer on 1/15/22.
 //
 
 #import <MetalKit/MetalKit.h>
+#import <AVFoundation/AVFoundation.h>
+#import "VideoCamera.h"
 
-// Our platform independent renderer class.   Implements the MTKViewDelegate protocol which
-//   allows it to accept per-frame update and drawable resize callbacks.
-@interface Renderer : NSObject <MTKViewDelegate>
+@interface Renderer : NSObject <MTKViewDelegate, AVCaptureVideoDataOutputSampleBufferDelegate>
 
--(nonnull instancetype)initWithMetalKitView:(nonnull MTKView *)view;
+- (nonnull instancetype)initWithMetalKitView:(nonnull MTKView *)view;
+
+@property (strong, nonatomic, readonly) id<MTLComputePipelineState> computePipelineState;
+@property (nonatomic, readonly) MTLSize gridSize;
+@property (nonatomic, readonly) MTLSize threadgroupsPerGrid;
+@property (nonatomic, readonly) MTLSize threadsPerThreadgroup;
+
 
 @end
 
