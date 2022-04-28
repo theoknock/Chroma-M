@@ -16,6 +16,8 @@
 		B95296072814A9A50007C0C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B95296062814A9A50007C0C0 /* Assets.xcassets */; };
 		B952960A2814A9A50007C0C0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B95296082814A9A50007C0C0 /* LaunchScreen.storyboard */; };
 		B952960C2814A9A50007C0C0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B952960B2814A9A50007C0C0 /* main.m */; };
+		B9A15EEB2819B43200923B95 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9A15EEA2819B43200923B95 /* Metal.framework */; };
+		B9A15EED2819B43700923B95 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9A15EEC2819B43700923B95 /* MetalKit.framework */; };
 		B9C33A392815CFF300EF18C8 /* ControlView.m in Sources */ = {isa = PBXBuildFile; fileRef = B9C33A382815CFF300EF18C8 /* ControlView.m */; };
 /* End PBXBuildFile section */
 
@@ -35,6 +37,8 @@
 		B95296062814A9A50007C0C0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B95296092814A9A50007C0C0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B952960B2814A9A50007C0C0 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		B9A15EEA2819B43200923B95 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		B9A15EEC2819B43700923B95 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		B9C33A372815CFF300EF18C8 /* ControlView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ControlView.h; sourceTree = "<group>"; wrapsLines = 0; };
 		B9C33A382815CFF300EF18C8 /* ControlView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ControlView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -44,6 +48,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B9A15EEB2819B43200923B95 /* Metal.framework in Frameworks */,
+				B9A15EED2819B43700923B95 /* MetalKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,6 +61,7 @@
 			children = (
 				B95295F62814A9A10007C0C0 /* Chroma */,
 				B95295F52814A9A10007C0C0 /* Products */,
+				B9A15EE92819B43100923B95 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -87,6 +94,15 @@
 				B952960B2814A9A50007C0C0 /* main.m */,
 			);
 			path = Chroma;
+			sourceTree = "<group>";
+		};
+		B9A15EE92819B43100923B95 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B9A15EEC2819B43700923B95 /* MetalKit.framework */,
+				B9A15EEA2819B43200923B95 /* Metal.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

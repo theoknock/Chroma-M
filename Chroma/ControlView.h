@@ -7,9 +7,13 @@
 
 #import <UIKit/UIKit.h>
 #include <stdio.h>
-#import <stdlib.h>
+#include <stdlib.h>
 #include <Block.h>
 #include <math.h>
+#include <dispatch/dispatch.h>
+#include <libkern/osatomic.h>
+#include <sys/types.h>
+#include <sys/mman.h>
 
 #import <objc/runtime.h>
 
@@ -24,6 +28,17 @@ unsigned long active_component_bit_vector     = ( 1UL << 0 |   1UL << 1 |   1UL 
 unsigned long highlighted_property_bit_vector = ( 0UL << 0 |   0UL << 1 |   0UL << 2 |   0UL << 3 |   0UL << 4 );
 unsigned long selected_property_bit_vector    = ( 0UL << 0 |   0UL << 1 |   0UL << 2 |   0UL << 3 |   0UL << 4 );
 unsigned long hidden_property_bit_vector      = ( 0UL << 0 |   0UL << 1 |   0UL << 2 |   0UL << 3 |   0UL << 4 );
+
+static const unsigned long (^state_setter)(void) = ^{
+    selected_property_bit_vector = highlighted_property_bit_vector & active_component_bit_vector;
+    hidden_property_bit_vector = (~selected_property_bit_vector & active_component_bit_vector);
+    highlighted_property_bit_vector = active_component_bit_vector ^ active_component_bit_vector;
+    active_component_bit_vector = ~active_component_bit_vector;
+    
+    return active_component_bit_vector;
+};
+static const unsigned long (^ _Nullable const (* _Nullable restrict state_setter_ptr))(void) = &state_setter;
+
 
 static CGPoint center_point;
 static float radius;
@@ -71,6 +86,30 @@ static dispatch_queue_t _Nonnull animator_queue() {
     });
     
     return queue;
+};
+
+static OSQueueHead PredFuncPtrQueue = OS_ATOMIC_QUEUE_INIT;
+
+struct PredFuncPtrStruct
+{
+    typeof(void(^*)(void)) predicate_t;
+    typeof(void(^*)(void)) function_t;
+    typeof(void(^*)(void)) block_t;
+};
+
+static void (^test_predicate_functions)(typeof(void(^)(void)), typeof(void(^)(void)), typeof(void(^)(void))) = ^ (typeof(void(^)(void)) predicate, typeof(void(^)(void)) function, typeof(void(^)(void)) block) {
+    (predicate)();
+    (function)();
+    (block)();
+    struct PredFuncPtrStruct * predicate_function_enqueue = malloc(sizeof(struct PredFuncPtrStruct));
+    predicate_function_enqueue->predicate_t = Block_copy((typeof(void(^*)(void)))CFBridgingRetain(predicate));
+    predicate_function_enqueue->function_t  = Block_copy((typeof(void(^*)(void)))CFBridgingRetain(function));
+    predicate_function_enqueue->block_t  = Block_copy((typeof(void(^*)(void)))CFBridgingRetain(block));
+    OSAtomicEnqueue(&PredFuncPtrQueue, predicate_function_enqueue, sizeof(struct PredFuncPtrStruct));
+    struct PredFuncPtrStruct * predicate_function_dequeue = OSAtomicDequeue(&PredFuncPtrQueue, sizeof(struct PredFuncPtrStruct));
+    ((const void(^)(void))CFBridgingRelease(predicate_function_dequeue->predicate_t))();
+    ((const void(^)(void))CFBridgingRelease(predicate_function_dequeue->function_t))();
+    ((const void(^)(void))CFBridgingRelease(predicate_function_dequeue->block_t))();
 };
 
 static NSArray<NSString *> * const CaptureDeviceConfigurationControlPropertyImageKeys = @[@"CaptureDeviceConfigurationControlPropertyTorchLevel",
@@ -135,37 +174,91 @@ static UIImage * (^CaptureDeviceConfigurationControlPropertySymbolImage)(Capture
 };
 
 static __strong id _Nonnull buttons[5];
-static void (^(^map)(id _Nonnull * _Nonnull, const unsigned long))(const void *(^__strong)(const unsigned long)) = ^ (id * _Nonnull obj_collection, const unsigned long index_count) {
+
+static unsigned long (^(^map)(id _Nonnull * _Nonnull, const unsigned long))(const void *(^__strong)(const unsigned long)) = ^ (id * _Nonnull obj_collection, const unsigned long index_count) {
     __block unsigned long (^recursive_block)(unsigned long);
     return ^ (const void * (^enumeration)(const unsigned long)) {
-        (recursive_block = ^ unsigned long (unsigned long counter) {
-            obj_collection[counter] = (__bridge id)((__bridge const void * _Nonnull)CFBridgingRelease(enumeration(counter)));
-            return (unsigned long)((counter += 1) ^ index_count) && (unsigned long)(recursive_block)(counter);
-        })(0ul);
+        return (recursive_block = ^ unsigned long (unsigned long index) {
+            --index;
+            *(obj_collection + index) = (__bridge id)((__bridge const void * _Nonnull)CFBridgingRelease(enumeration(index)));
+            return (unsigned long)(index ^ 0UL) && (unsigned long)(recursive_block)(index);
+        })(index_count);
     };
 };
 
-static void (^(^iterate)(id _Nonnull * _Nonnull, const unsigned long))(void(^__strong)(id)) = ^ (id * _Nonnull obj_collection, const unsigned long index_count) {
+static unsigned long (^(^iterate)(id _Nonnull * _Nonnull, const unsigned long))(void(^__strong)(id)) = ^ (id * _Nonnull obj_collection, const unsigned long index_count) {
     __block unsigned long (^recursive_block)(unsigned long);
     return ^ (void(^enumeration)(id)) {
-        (recursive_block = ^ unsigned long (unsigned long counter) {
-            enumeration(obj_collection[counter]);
-            return (unsigned long)((counter += 1) ^ index_count) && (unsigned long)(recursive_block)(counter);
-        })(0ul);
+        return (recursive_block = ^ unsigned long (unsigned long index) {
+            --index;
+            enumeration(*(obj_collection + index));
+            return (unsigned long)(index ^ 0UL) && (unsigned long)(recursive_block)(index);
+        })(index_count);
     };
 };
 
-
-static const unsigned long (^state_setter)(void) = ^{
-    selected_property_bit_vector = highlighted_property_bit_vector & active_component_bit_vector;
-    hidden_property_bit_vector = (~selected_property_bit_vector & active_component_bit_vector);
-    highlighted_property_bit_vector = active_component_bit_vector ^ active_component_bit_vector;
-    active_component_bit_vector = ~active_component_bit_vector;
-    
-    return active_component_bit_vector;
-};
-static const unsigned long (^ _Nullable const (* _Nullable restrict state_setter_ptr))(void) = &state_setter;
-
+// Iterate an array of predicated-function blocks...
+//
+//typedef typeof(unsigned long(^)(unsigned long)) blk;
+//typedef typeof(unsigned long(^*)(unsigned long)) blk_t;
+//blk blk_a;
+//__block blk_t blka_t = &blk_a;
+//blk blk_b;
+//__block blk_t blkb_t = &blk_b;
+//blk blk_c;
+//const blk_t blkc_t = &blk_c;
+//
+//__block unsigned long count = 5;
+//count = ~(1 << (count + 1));
+//
+//blk_a = ^ unsigned long (unsigned long counter) {
+//    printf("blk_a counter == %lu\n", counter);
+//    return (*blkc_t)(counter); //(unsigned long)(*blkb_t)(((counter <<= 1) ^ (0 - counter)));
+//};
+//
+//blk_b = ^ unsigned long (unsigned long counter) {
+//    printf("blk_b counter == %lu\n", counter);
+//    return (*blkc_t)(counter); //(unsigned long)(*blka_t)(((counter <<= 1) ^ (0 - counter)));
+//};
+//
+//blk_c = ^ unsigned long (unsigned long counter) {
+//    int c =
+//    printf("blk_c counter == %lu\n", (unsigned long)(floor(log2(counter))));
+//    
+//    return ((counter >>= 1UL) & 1UL) && ((counter % (1UL << 1) ^ (1UL << 0)) & (*blka_t)(counter)) | (*blkb_t)(counter);
+//};
+//
+//
+//
+//(*blka_t)((unsigned long)(count));
+//
+//
+//typedef typeof(unsigned long(^)(unsigned long)) predicate_function;
+//typedef typeof(unsigned long(^*)(unsigned long)) predicate_function_t;
+//predicate_function blk_a;
+//__block predicate_function_t blka_t = &blk_a;
+//predicate_function blk_b;
+//__block predicate_function_t blkb_t = &blk_b;
+//
+//blk_a = ^ unsigned long (unsigned long predicate) {
+//    return predicate && (*blkb_t)(TRUE_BIT); //(unsigned long)(*blkb_t)(((counter <<= 1) ^ (0 - counter)));
+//};
+//
+//blk_b = ^ unsigned long (unsigned long counter) {
+//    printf("blk_b counter == %lu\n", counter);
+//    return (*blkc_t)(counter); //(unsigned long)(*blka_t)(((counter <<= 1) ^ (0 - counter)));
+//};
+//static void (^test)(void) = ^{
+//    pred a, b;
+//    a(b(1));
+//    
+//    
+//    
+//};
+//// Compose a combining them in pairs (combine 1 and 2; then, combine with 3; then combine with 4...)
+//// invoke the composition when there are no more blocks to combine
+//
+//
 
 @interface ControlView : UIView
 
