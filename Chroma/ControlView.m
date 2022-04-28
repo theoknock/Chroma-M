@@ -52,30 +52,30 @@ static float (^radius_from_point)(CGPoint) = ^ (CGPoint point) {
 
 static const void (^(^tick_wheel_renderer)(void))(CGContextRef, CGRect) = ^{
     __block unsigned long (^recursive_block)(unsigned long);
-    return ^ (float * restrict angle_t, float * restrict radius_t) {
+    return ^ (float * angle_t, float * radius_t) {
         return ^ (CGContextRef ctx, CGRect rect) {
             dispatch_barrier_sync(enumerator_queue(), ^{
                 ((active_component_bit_vector ^ BUTTON_ARC_COMPONENT_BIT_MASK) && ^ unsigned long (void) {
                     UIGraphicsBeginImageContextWithOptions(rect.size, FALSE, 1.0);
                     CGContextTranslateCTM(ctx, CGRectGetMinX(rect), CGRectGetMinY(rect));
                     (recursive_block = ^ unsigned long (unsigned long t) {
-                        *angle_t = t * kRadians_f;
-                        float tick_height = (t == 180 || t == 270) ? 9.0 : (t % (unsigned int)round((270 - 180) / 9.0) == 0) ? 6.0 : 3.0;
+                        float radians = t * kRadians_f;
+                        float tick_height = (t == arc_range[0] || t == arc_range[1]) ? 9.0 : (t % (unsigned int)round((arc_range[1] - arc_range[0]) / 9.0) == 0) ? 6.0 : 3.0;
                         {
-                            CGPoint xy_outer = CGPointMake(((*radius_t + tick_height) * cosf(*angle_t)),
-                                                           ((*radius_t + tick_height) * sinf(*angle_t)));
-                            CGPoint xy_inner = CGPointMake(((*radius_t - tick_height) * cosf(*angle_t)),
-                                                           ((*radius_t - tick_height) * sinf(*angle_t)));
-                            CGContextSetStrokeColorWithColor(ctx, (t <= *angle_t) ? [[UIColor systemGreenColor] CGColor] : [[UIColor systemRedColor] CGColor]);
-                            CGContextSetLineWidth(ctx, (t == 180 || t == 270) ? 2.0 : (t % 9 == 0) ? 1.0 : 0.625);
+                            CGPoint xy_outer = CGPointMake(((*radius_t + tick_height) * cosf(radians)),
+                                                           ((*radius_t + tick_height) * sinf(radians)));
+                            CGPoint xy_inner = CGPointMake(((*radius_t - tick_height) * cosf(radians)),
+                                                           ((*radius_t - tick_height) * sinf(radians)));
+                            CGContextSetStrokeColorWithColor(ctx, (t < (unsigned long)(*angle_t)) ? [[UIColor systemGreenColor] CGColor] : [[UIColor systemRedColor] CGColor]);
+                            CGContextSetLineWidth(ctx, (t == arc_range[0] || t == arc_range[1]) ? 2.0 : (t % 9 == 0) ? 1.0 : 0.625);
                             CGContextMoveToPoint(ctx, xy_outer.x + CGRectGetMaxX(rect), xy_outer.y + CGRectGetMaxY(rect));
                             CGContextAddLineToPoint(ctx, xy_inner.x + CGRectGetMaxX(rect), xy_inner.y + CGRectGetMaxY(rect));
                         };
                         CGContextStrokePath(ctx);
                         UIGraphicsEndImageContext();
                         t++;
-                        return (unsigned long)(t ^ 270UL) && (unsigned long)(recursive_block)(t);
-                    })(180UL);
+                        return (unsigned long)(t ^ (unsigned long)arc_range[1]) && (unsigned long)(recursive_block)(t);
+                    })(arc_range[0]);
                     return TRUE_BIT;
                 }()) || ((active_component_bit_vector & BUTTON_ARC_COMPONENT_BIT_MASK) && ^ unsigned long (void) {
                     CGContextClearRect(ctx, rect);
