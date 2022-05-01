@@ -33,6 +33,13 @@ static CGPoint (^button_center_point)(const unsigned long) = ^ CGPoint (const un
     }(&angle, &radius);
 };
 
+static CGPoint (^point_from_angle)(const float) = ^ CGPoint (const float button_angle) {
+    return ^ (float * angle_t, float * radius_t) {
+        float radians = ((*angle_t) * kRadians_f);
+        return CGPointMake(center_point.x - (*radius_t) * -cos(radians), center_point.y - (*radius_t) * -sin(radians));
+    }(&button_angle, &radius);
+};
+
 static float (^angle_from_point)(CGPoint) = ^ (CGPoint point) {
     return ^ (float * angle_t) {
         *angle_t = (atan2(point.y - center_point.y, point.x - center_point.x)) * (arc_range[0] / M_PI);
@@ -204,6 +211,22 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    int frame_count = 60;
+    int angle_offset = 360.0 / frame_count;
+    
+    (integrate((unsigned long)frame_count)(^ (unsigned long frame, BOOL * STOP) {
+        printf("frame == %lu\n", frame);
+//        iterate(&buttons, 5)(^ (id button) {
+//            [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//            [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//            [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//            printf("frame = %lu\n", frame);
+//
+//            [(UIButton *)button setCenter:point_from_angle(angle_from_point(((UIButton *)button).center) + (angle_offset * frame))];
+//        });
+//        [self setNeedsDisplay];
+        return frame;
+    }));
     handle_touch(state_setter_ptr);
 }
 
