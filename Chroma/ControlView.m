@@ -211,9 +211,11 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    const int frame_count = 30;
+    const int frame_count = 60;
     int angle_offset = 360.0 / frame_count;
-    
+    // TO-DO: A block that assigns one of two values to a pointer to a button_center_rotation block (either increment or decrement, depending on the state)
+    // The button_center_rotation block should take a calculation like the bit-printer block or the radius/angle/etc.
+//    int (^button_center_rotation)(
     (integrate((unsigned long)frame_count)(^ (unsigned long frame, BOOL * STOP) {
         iterate(&buttons, 5)(^ (id button) {
             [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
