@@ -219,7 +219,7 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
             [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
             [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
             [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
-            [(UIButton *)button setCenter:point_from_angle((angle_offset * (int)frame) % 360)];
+            [(UIButton *)button setCenter:point_from_angle(((int)angle_from_point(button_center_point(((UIButton *)button).tag)) + (int)round(floor((angle_offset * frame)))) % 360)];
         });
         return frame;
     }));
