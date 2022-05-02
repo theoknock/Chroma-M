@@ -201,71 +201,134 @@ static void (^test_predicate_functions)(typeof(void(^)(void)), typeof(void(^)(vo
     ((const void(^)(void))CFBridgingRelease(predicate_function_dequeue->block_t))();
 };
 
-static OSQueueHead IntegrandQueue = OS_ATOMIC_QUEUE_INIT;
-struct IntegrandStruct {
-    typeof(unsigned long(^*)(unsigned long)) _Nonnull integrand_t;
+static OSQueueHead IntegrandsAtomicQueue = OS_ATOMIC_QUEUE_INIT;
+struct IntegrandsStruct
+{
+    unsigned long (^ _Nonnull __strong (*integrand_t))(void);
 };
+
+
 static unsigned long (^ __strong integrand)(unsigned long, BOOL *);
-static unsigned long (^(^integrate)(unsigned long))(unsigned long (^ __strong )(unsigned long, BOOL *)) = ^ (unsigned long frame_count) {
+static unsigned long (^(^integrate)(unsigned long))(unsigned long (^ __strong )(unsigned long, BOOL *)) = ^ (unsigned long frame_count){
     __block typeof(CADisplayLink *) display_link;
     __block unsigned long frames = ~(1 << (frame_count + 1));
     __block unsigned long frame;
     __block BOOL STOP = FALSE;
+    unsigned long (^ _Nonnull __strong integrands[frame_count])(void);
+    const unsigned long (^ const _Nonnull __strong (* const integrands_t)[frame_count])(void) = &integrands;
     
-    /*
-     
-     const float (^(^blk)(float))(void) = ^ (float f) {
-             return ^ (float f) {
-                 return ^ float {
-                     return f;
-                 };
-             }(f);
-         };
-     const float(^blk_param)(void) = blk(1.0);
-     printf("blk_param() == %f\n", blk_param());
-     
-     */
+    map(&integrands, frame_count)(^ const void * (const unsigned long index) {
+        return Block_copy((typeof(void(^*)(void)))CFBridgingRetain(^ (unsigned long frame, BOOL * STOP) {
+            return ^{
+                printf("integrand == %lu\n", frame);
+                return (STOP != FALSE) ? printf("STOPPED\n") : integrand(frame, &STOP);
+            };
+        }(index, &STOP)));
+    });
+    
+    // TO_DO: iterate collection here and add each element to the atomic queue
+    iterate(&integrands, frame_count)(^ (unsigned long (^ __strong integrand)(unsigned long, BOOL *)) {
+        struct IntegrandsStruct * integrand_enqueued = malloc(sizeof(struct IntegrandsStruct));
+        integrand_enqueued->integrand_t = Block_copy((typeof(void(^*)(void)))CFBridgingRetain(integrand));
+        OSAtomicEnqueue(&IntegrandsAtomicQueue, integrand_enqueued, sizeof(struct IntegrandsStruct));
+        
+//        integrand_enqueued->integrand_t = &integrands[0];
+    });
+    
+    
+    
+    
     
     return ^ (unsigned long (^ __strong integrand)(unsigned long, BOOL *)) {
-        unsigned long (^ _Nonnull __strong integrands[frame_count])(void);
-        
-        map(&integrands, frame_count)(^ const void * (const unsigned long index) {
-            printf("map == %lu\n", index);
-            return (const void *)CFBridgingRetain(^ (unsigned long frame, BOOL * STOP) {
-                return ^{
-                    printf("integrand == %lu\n", frame);
-                    return integrand(frame, STOP);
-                };
-            }(index, &STOP));
-        });
-                iterate(&integrands, frame_count)(^ (id block) {
-                    printf("block == %lu\n", ((typeof(unsigned long (^)(void)))CFBridgingRelease((__bridge CFTypeRef _Nullable)(block)))());
-        
-                });
         display_link = [CADisplayLink displayLinkWithTarget:^{
             frames >>= 1;
-            frame = floor(log2(frames));
-            printf("display_link == %lu\n", frame);
-//            unsigned long (^integrand_t)(void) = CFBridgingRelease((__bridge CFTypeRef _Nullable)(integrands[frame]));
-//            iterate(&integrands, 30)(^ (id block) {
-//                printf("integrand_t == %lu\n", ((typeof(unsigned long (^)(void)))block)());
-//    //            = CFBridgingRelease((__bridge CFTypeRef _Nullable)(integrands[frame]));
-//
-//            });
-//            (((frames & 1) & (STOP == FALSE)) && integrand_t()) || ^ long {
-//                printf("integrand_t == %lu\n", ((typeof(unsigned long (^)(void)))integrand_t)());
-                [display_link removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
-                [display_link invalidate];
-                [display_link setPaused:TRUE];
-                display_link = nil;
-//                return active_component_bit_vector;
-//                return active_component_bit_vector;
-//            }();
+            ((frames & 1) && (^ long {
+                frame = floor(log2(frames));
+
+                ((((frames ^ 0UL) & (STOP == TRUE))) && ^ long {
+                    [display_link removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+                    [display_link invalidate];
+                    [display_link setPaused:TRUE];
+                    display_link = nil;
+                    return active_component_bit_vector;
+                }()) || ^ unsigned long {
+                    struct IntegrandsStruct * integrand_dequeued = OSAtomicDequeue(&IntegrandsAtomicQueue, sizeof(struct IntegrandsStruct));
+                    return (integrand_dequeued) ? ((unsigned long(^)(void))CFBridgingRelease(integrand_dequeued->integrand_t))() : 1UL;
+                }();
+                return active_component_bit_vector;
+            }()));
         } selector:@selector(invoke)];
         [display_link addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
-        return TRUE_BIT;
+        return frame;
     };
 };
+
+//static OSQueueHead IntegrandQueue = OS_ATOMIC_QUEUE_INIT;
+//struct IntegrandStruct {
+//    typeof(unsigned long(^*)(unsigned long)) _Nonnull integrand_t;
+//};
+//static unsigned long (^ __strong integrand)(unsigned long, BOOL *);
+//static unsigned long (^(^integrate)(unsigned long))(unsigned long (^ __strong )(unsigned long, BOOL *)) = ^ (unsigned long frame_count) {
+//    static typeof(CADisplayLink *) display_link;
+//    __block unsigned long frames = ~(1 << (frame_count + 1));
+//    __block unsigned long frame;
+//    __block BOOL * STOP = FALSE;
+//    
+//    /*
+//     
+//     const float (^(^blk)(float))(void) = ^ (float f) {
+//     return ^ (float f) {
+//     return ^ float {
+//     return f;
+//     };
+//     }(f);
+//     };
+//     const float(^blk_param)(void) = blk(1.0);
+//     printf("blk_param() == %f\n", blk_param());
+//     
+//     */
+//    
+//    return ^ (unsigned long (^ __strong integrand)(unsigned long, BOOL *)) {
+//        typeof(unsigned long (^ _Nonnull __strong )(void)) integrands[frame_count];
+//        typeof(unsigned long (^ _Nonnull __strong )(void)) * integrands_t = &integrands;
+//        
+//        map(&integrands, frame_count)(^ const void * (const unsigned long index) {
+//            printf("map == %lu\n", index);
+//            return (const void *)CFBridgingRetain(^ (unsigned long frame, BOOL * STOP) {
+//                return ^{
+//                    printf("integrand == %lu\n", frame);
+//                    return (STOP != FALSE) ? printf("STOPPED\n") : integrand(frame, &STOP);
+//                };
+//            }(index, &STOP));
+//        });
+//        iterate(&integrands, frame_count)(^ (id block) {
+//            printf("block == %lu\n", ((typeof(unsigned long (^)(void)))CFBridgingRelease((__bridge CFTypeRef _Nullable)(block)))());
+//            
+//        });
+//        display_link = [CADisplayLink displayLinkWithTarget:^{
+//            frames >>= 1;
+//            frame = floor(log2(frames));
+//            printf("display_link == %lu\n", frame);
+//            //              unsigned long (^integrand_t)(void) = CFBridgingRelease((__bridge CFTypeRef _Nullable)(integrands[frame]));
+//            //            iterate(&integrands, 30)(^ (id block) {
+//            //                printf("integrand_t == %lu\n", ((typeof(unsigned long (^)(void)))block)());
+//            //    //            = CFBridgingRelease((__bridge CFTypeRef _Nullable)(integrands[frame]));
+//            //
+//            //            });
+//            //            (((frames & 1) & (STOP == FALSE)) && integrand_t()) || ^ long {
+//            //                printf("integrand_t == %lu\n", ((typeof(unsigned long (^)(void)))integrand_t)());
+////            [display_link removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+////            [display_link invalidate];
+////            [display_link setPaused:TRUE];
+////            display_link = nil;
+//            //                return active_component_bit_vector;
+//            //                return active_component_bit_vector;
+//            //            }();
+//        } selector:@selector(invoke)];
+//        [display_link addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+//        return TRUE_BIT;
+//    };
+//};
 
 // Iterate an array of predicated-function blocks...
 //

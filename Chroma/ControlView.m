@@ -215,6 +215,7 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
     int angle_offset = 360.0 / frame_count;
     
     (integrate((unsigned long)frame_count)(^ (unsigned long frame, BOOL * STOP) {
+        if (frame == 15) *STOP = TRUE;
         printf("frame == %lu\n", frame);
 //        iterate(&buttons, 5)(^ (id button) {
 //            [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
