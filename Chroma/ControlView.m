@@ -211,21 +211,16 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    const int frame_count = 60;
+    const int frame_count = 30;
     int angle_offset = 360.0 / frame_count;
     
     (integrate((unsigned long)frame_count)(^ (unsigned long frame, BOOL * STOP) {
-//        if (frame == 15) *STOP = TRUE;
-        printf("frame == %lu\n", frame);
         iterate(&buttons, 5)(^ (id button) {
             [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
             [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
             [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
-            printf("frame = %lu\n", frame);
-
-            [(UIButton *)button setCenter:point_from_angle(angle_from_point(((UIButton *)button).center) + (angle_offset * (int)frame))];
+            [(UIButton *)button setCenter:point_from_angle((angle_offset * (int)frame) % 360)];
         });
-//        [self setNeedsDisplay];
         return frame;
     }));
     handle_touch(state_setter_ptr);
