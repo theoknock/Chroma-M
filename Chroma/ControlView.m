@@ -96,16 +96,16 @@ static const void (^(^tick_wheel_renderer)(void))(CGContextRef, CGRect) = ^{
 static const void (^draw_tick_wheel)(CGContextRef, CGRect);
 static const void (^ const (* restrict draw_tick_wheel_t))(CGContextRef, CGRect) = &draw_tick_wheel;
 
-static unsigned long (^(^_Nonnull touch_handler)(__strong UITouch * _Nullable))(const unsigned long (^ const (* _Nullable restrict))(void));
-static unsigned long (^ _Nonnull  handle_touch)(const unsigned long (^ const (* _Nullable restrict))(void));
-static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__strong UITouch * _Nullable))(const unsigned long (^ const (* _Nullable restrict))(void)) = ^ (const ControlView * __strong view) {
+static unsigned long (^(^_Nonnull touch_handler)(__strong UITouch * _Nullable))(const unsigned long (^ const (* _Nullable restrict))(unsigned long));
+static unsigned long (^ _Nonnull  handle_touch)(const unsigned long (^ const (* _Nullable restrict))(unsigned long));
+static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__strong UITouch * _Nullable))(const unsigned long (^ const (* _Nullable restrict))(unsigned long)) = ^ (const ControlView * __strong view) {
     __block unsigned long touch_property;
 
     draw_tick_wheel = tick_wheel_renderer();
     
     return ^ (__strong UITouch * _Nullable touch) {
         
-        return ^ (const unsigned long (^ const (* _Nullable restrict state_setter_t))(void)) {
+        return ^ (const unsigned long (^ const (* _Nullable restrict state_setter_t))(unsigned long)) {
             
             return ^ unsigned long (unsigned long state) {
                 
@@ -128,8 +128,22 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
                         angle_from_point(touch_point);
                         return state;
                     }([touch preciseLocationInView:(ControlView *)view]);
-                }((unsigned long)(((unsigned long)0 | (unsigned long)state_setter_t) && (*state_setter_t)() || FALSE_BIT))));
-                
+                }((unsigned long)(((unsigned long)0 | (unsigned long)state_setter_t) && (*state_setter_t)(^ unsigned long {
+                    const int frame_count = 60;
+                    __block int angle_offset = 360.0 / frame_count;
+                    (integrate((unsigned long)frame_count)(^ (unsigned long frame, BOOL * STOP) {
+                        int degrees = (int)round((angle_offset * frame) % 360);
+                        iterate(&buttons, 5)(^ (UIButton * button) {
+                            [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+                            [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+                            [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+                            [(UIButton *)button setCenter:point_from_angle(((int)angle_from_point(button_center_point(((UIButton *)button).tag)) + degrees))];
+                        });
+                        return frame;
+                    }));
+                    return TRUE_BIT;
+                }())))));
+            
                 return state;
                 
             }(TRUE_BIT);
@@ -211,20 +225,18 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    const int frame_count = 60;
-    int angle_offset = 360.0 / frame_count;
-    // TO-DO: A block that assigns one of two values to a pointer to a button_center_rotation block (either increment or decrement, depending on the state)
-    // The button_center_rotation block should take a calculation like the bit-printer block or the radius/angle/etc.
-//    int (^button_center_rotation)(
-    (integrate((unsigned long)frame_count)(^ (unsigned long frame, BOOL * STOP) {
-        iterate(&buttons, 5)(^ (id button) {
-            [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
-            [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
-            [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
-            [(UIButton *)button setCenter:point_from_angle(((int)angle_from_point(button_center_point(((UIButton *)button).tag)) + (int)round(floor((angle_offset * frame)))) % 360)];
-        });
-        return frame;
-    }));
+//    const int frame_count = 60;
+//    __block int angle_offset = 360.0 / frame_count;
+//    (integrate((unsigned long)frame_count)(^ (unsigned long frame, BOOL * STOP) {
+//        int degrees = (int)round((angle_offset * frame) % 360);
+//        iterate(&buttons, 5)(^ (UIButton * button) {
+//            [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//            [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//            [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//            [(UIButton *)button setCenter:point_from_angle(((int)angle_from_point(button_center_point(((UIButton *)button).tag)) + degrees))];
+//        });
+//        return frame;
+//    }));
     handle_touch(state_setter_ptr);
 }
 

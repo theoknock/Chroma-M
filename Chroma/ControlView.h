@@ -29,7 +29,7 @@ unsigned long highlighted_property_bit_vector = ( 0UL << 0 |   0UL << 1 |   0UL 
 unsigned long selected_property_bit_vector    = ( 0UL << 0 |   0UL << 1 |   0UL << 2 |   0UL << 3 |   0UL << 4 );
 unsigned long hidden_property_bit_vector      = ( 0UL << 0 |   0UL << 1 |   0UL << 2 |   0UL << 3 |   0UL << 4 );
 
-static const unsigned long (^state_setter)(void) = ^{
+static const unsigned long (^state_setter)(unsigned long) = ^ (unsigned long predicate) {
     selected_property_bit_vector = highlighted_property_bit_vector & active_component_bit_vector;
     hidden_property_bit_vector = (~selected_property_bit_vector & active_component_bit_vector);
     highlighted_property_bit_vector = active_component_bit_vector ^ active_component_bit_vector;
@@ -37,7 +37,7 @@ static const unsigned long (^state_setter)(void) = ^{
     
     return active_component_bit_vector;
 };
-static const unsigned long (^ _Nullable const (* _Nullable restrict state_setter_ptr))(void) = &state_setter;
+static const unsigned long (^ _Nullable const (* _Nullable restrict state_setter_ptr))(unsigned long) = &state_setter;
 
 
 static CGPoint center_point;
