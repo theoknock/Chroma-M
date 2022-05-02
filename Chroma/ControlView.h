@@ -253,7 +253,7 @@ static unsigned long (^(^integrate)(unsigned long))(unsigned long (^ __strong )(
                     return active_component_bit_vector;
                 }()) || ^ unsigned long {
                     struct IntegrandsStruct * integrand_dequeued = OSAtomicDequeue(&IntegrandsAtomicQueue, sizeof(struct IntegrandsStruct));
-                    return (integrand_dequeued) ? ((unsigned long(^)(void))CFBridgingRelease(integrand_dequeued->integrand_t))() : 1UL;
+                    return (integrand_dequeued && ((unsigned long(^)(void))CFBridgingRelease(integrand_dequeued->integrand_t))()) || active_component_bit_vector;
                 }();
                 return active_component_bit_vector;
             }()));
