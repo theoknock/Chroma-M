@@ -216,20 +216,30 @@ static unsigned long (^(^integrate)(unsigned long))(unsigned long (^ __strong )(
     __block BOOL STOP = FALSE;
     
     return ^ (unsigned long (^ __strong integrand)(unsigned long, BOOL *)) {
-        unsigned long (^ _Nonnull __strong integrands[frame_count])(void);
-        map(&integrands, frame_count)(^ const void * (const unsigned long index) {
-            return Block_copy((typeof(unsigned long(^*)(void)))CFBridgingRetain(^ (unsigned long frame, BOOL * STOP) {
-                return ^ unsigned long (unsigned long frame, BOOL * STOP) {
-                    return integrand(index, &STOP);
-                };
-            }(index, &STOP)));
-        });
         
-        iterate(&integrands, frame_count)(^ (unsigned long (^ __strong integrand_block)(unsigned long, BOOL *)) {
-            struct IntegrandsStruct * integrand_enqueued = malloc(sizeof(struct IntegrandsStruct));
-            integrand_enqueued->integrand_t = Block_copy((typeof(unsigned long(^*)(void)))CFBridgingRetain(integrand_block));
-            OSAtomicEnqueue(&IntegrandsAtomicQueue, integrand_enqueued, sizeof(struct IntegrandsStruct));
-        });
+        typedef typeof(unsigned long (^ _Nonnull __strong )(void)) integrands[frame_count];
+        typeof(integrands) integrands_ptr[frame_count];
+        
+        ^ unsigned long (const id * _Nonnull integrands_t) {
+            iterate((id *)integrands_t, frame_count)(^ (unsigned long (^ __strong integrand_block)(unsigned long, BOOL *)) {
+                struct IntegrandsStruct * integrand_enqueued = malloc(sizeof(struct IntegrandsStruct));
+                integrand_enqueued->integrand_t = Block_copy((typeof(unsigned long(^*)(void)))CFBridgingRetain(integrand_block));
+                OSAtomicEnqueue(&IntegrandsAtomicQueue, integrand_enqueued, sizeof(struct IntegrandsStruct));
+            });
+            return TRUE_BIT;
+        }(^ const id * _Nonnull (const id * _Nonnull integrands_t) {
+            map((id *)integrands_t, frame_count)(^ const void * (const unsigned long index) {
+                return Block_copy((typeof(unsigned long(^*)(void)))CFBridgingRetain(^ (unsigned long frame, BOOL * STOP) {
+                    return ^ unsigned long (unsigned long frame, BOOL * STOP) {
+                        return integrand(index, STOP);
+                    };
+                }(index, &STOP)));
+            });
+            return (const id *)(integrands_t);
+        }((id *)&integrands_ptr));
+        
+        
+        
         display_link = [CADisplayLink displayLinkWithTarget:^{
             frames >>= 1;
             ((frames & 1) && (^ long {
@@ -251,7 +261,6 @@ static unsigned long (^(^integrate)(unsigned long))(unsigned long (^ __strong )(
         return frame;
     };
 };
-
 
 // Iterate an array of predicated-function blocks...
 //
@@ -280,7 +289,7 @@ static unsigned long (^(^integrate)(unsigned long))(unsigned long (^ __strong )(
 //blk_c = ^ unsigned long (unsigned long counter) {
 //    int c =
 //    printf("blk_c counter == %lu\n", (unsigned long)(floor(log2(counter))));
-//    
+//
 //    return ((counter >>= 1UL) & 1UL) && ((counter % (1UL << 1) ^ (1UL << 0)) & (*blka_t)(counter)) | (*blkb_t)(counter);
 //};
 //
@@ -307,9 +316,9 @@ static unsigned long (^(^integrate)(unsigned long))(unsigned long (^ __strong )(
 //static void (^test)(void) = ^{
 //    pred a, b;
 //    a(b(1));
-//    
-//    
-//    
+//
+//
+//
 //};
 //// Compose a combining them in pairs (combine 1 and 2; then, combine with 3; then combine with 4...)
 //// invoke the composition when there are no more blocks to combine

@@ -8,7 +8,7 @@
 #import "ControlView.h"
 #include <stdio.h>   /* for printf */
 #include <stdarg.h>  /* for va_arg, va_start,
-                        va_list, va_end */
+va_list, va_end */
 
 @implementation ControlView
 
@@ -30,39 +30,36 @@ CGPoint (^button_center_point_va)(const char *fmt, ...) = ^ CGPoint (const char 
     va_start(ap, fmt);
     return ^ (float * angle_t, float * radius_t) {
         const char * fmt_block = fmt;
-    
-    while (* fmt_block)
-    {
-        switch (*fmt_block)
+        while (* fmt_block)
         {
-            case '%':
-                fmt_block++;
-                if (*fmt_block == 'd')
-                {
-                    int button_tag = va_arg(ap, int);
-                    printf("<%d> is an integer\n", button_tag);
-                    ((active_component_bit_vector & BUTTON_ARC_COMPONENT_BIT_MASK) && (^ long {
-                        *angle_t = rescale(button_tag, CaptureDeviceConfigurationControlPropertyTorchLevel, CaptureDeviceConfigurationControlPropertyVideoZoomFactor, arc_range[0], arc_range[1]);
-                        return TRUE_BIT;
-                    }()));
-                }
-                else if (*fmt_block == 'f')
-                {
-                    char *s = va_arg(ap, char*);
-                    printf("<%f> is a float\n", s);
-                }
-                else {
-                    printf("%%%c is an unknown format\n",
-                           *fmt_block);
-                }
-                fmt_block++;
-                break;
-            default:
-                printf("%c is unknown\n", *fmt_block);
-                fmt_block++;
-                break;
-        } }
-    va_end(ap);
+            switch (*fmt_block)
+            {
+                case '%':
+                    fmt_block++;
+                    if (*fmt_block == 'd')
+                    {
+                        int button_tag = va_arg(ap, int);
+                        ((active_component_bit_vector & BUTTON_ARC_COMPONENT_BIT_MASK) && (^ long {
+                            *angle_t = rescale(button_tag, CaptureDeviceConfigurationControlPropertyTorchLevel, CaptureDeviceConfigurationControlPropertyVideoZoomFactor, arc_range[0], arc_range[1]);
+                            return TRUE_BIT;
+                        }()));
+                    }
+                    else if (*fmt_block == 'f')
+                    {
+                        *angle_t = va_arg(ap, double);
+                    }
+                    else {
+                        printf("%%%c is an unknown format\n",
+                               *fmt_block);
+                    }
+                    fmt_block++;
+                    break;
+                default:
+                    printf("%c is unknown\n", *fmt_block);
+                    fmt_block++;
+                    break;
+            } }
+        va_end(ap);
         float radians = ((*angle_t) * kRadians_f);
         return CGPointMake(center_point.x - (*radius_t) * -cos(radians), center_point.y - (*radius_t) * -sin(radians));
     }(&angle, &radius);
@@ -114,7 +111,7 @@ static const void (^(^tick_wheel_renderer)(void))(CGContextRef, CGRect) = ^{
                     (recursive_block = ^ unsigned long (unsigned long t) {
                         float radians = t * kRadians_f;
                         
-//                        (a & b) | (~a & c)
+                        //                        (a & b) | (~a & c)
                         float tick_height = (t == arc_range[0] || t == arc_range[1]) ? 9.0 : (t % (unsigned int)round((arc_range[1] - arc_range[0]) / 9.0) == 0) ? 6.0 : 3.0;
                         {
                             CGPoint xy_outer = CGPointMake(((*radius_t + tick_height) * cosf(radians)),
@@ -149,7 +146,7 @@ static unsigned long (^(^_Nonnull touch_handler)(__strong UITouch * _Nullable))(
 static unsigned long (^ _Nonnull  handle_touch)(const unsigned long (^ const (* _Nullable restrict))(unsigned long));
 static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__strong UITouch * _Nullable))(const unsigned long (^ const (* _Nullable restrict))(unsigned long)) = ^ (const ControlView * __strong view) {
     __block unsigned long touch_property;
-
+    
     draw_tick_wheel = tick_wheel_renderer();
     
     return ^ (__strong UITouch * _Nullable touch) {
@@ -181,25 +178,25 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
                     const int frame_count = 60;
                     __block int angle_offset = 360.0 / frame_count;
                     (integrate((unsigned long)frame_count)(^ (unsigned long frame, BOOL * STOP) {
+                        printf("integrate == %lu\n", frame);
                         int degrees = (int)round((angle_offset * frame) % 360);
                         return iterate(&buttons, CaptureDeviceConfigurationControlPropertyAll)(^ (UIButton * button) {
                             [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
                             [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
                             [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
-                            [(UIButton *)button setCenter:button_center_point_va("%f", (((int)angle_from_point(button_center_point_va("%d", (((UIButton *)button).tag))) + degrees)))];
+                            [(UIButton *)button setCenter:button_center_point_va("%f", (rescale(((UIButton *)button).tag, CaptureDeviceConfigurationControlPropertyTorchLevel, CaptureDeviceConfigurationControlPropertyVideoZoomFactor, arc_range[0], arc_range[1])) + degrees)];
+                            //                            [(UIButton *)button setCenter:button_center_point_va("%f", ((angle_from_point(button_center_point_va("%d", (((UIButton *)button).tag))) + degrees)))];
                         });
                     }));
                     return TRUE_BIT;
                 }())))));
-            
+                
                 return state;
                 
             }(TRUE_BIT);
         };
     };
 };
-
-
 
 
 - (void)awakeFromNib {
@@ -296,18 +293,18 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-//    const int frame_count = 60;
-//    __block int angle_offset = 360.0 / frame_count;
-//    (integrate((unsigned long)frame_count)(^ (unsigned long frame, BOOL * STOP) {
-//        int degrees = (int)round((angle_offset * frame) % 360);
-//        iterate(&buttons, 5)(^ (UIButton * button) {
-//            [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
-//            [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
-//            [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
-//            [(UIButton *)button setCenter:point_from_angle(((int)angle_from_point(button_center_point(((UIButton *)button).tag)) + degrees))];
-//        });
-//        return frame;
-//    }));
+    //    const int frame_count = 60;
+    //    __block int angle_offset = 360.0 / frame_count;
+    //    (integrate((unsigned long)frame_count)(^ (unsigned long frame, BOOL * STOP) {
+    //        int degrees = (int)round((angle_offset * frame) % 360);
+    //        iterate(&buttons, 5)(^ (UIButton * button) {
+    //            [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+    //            [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+    //            [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+    //            [(UIButton *)button setCenter:point_from_angle(((int)angle_from_point(button_center_point(((UIButton *)button).tag)) + degrees))];
+    //        });
+    //        return frame;
+    //    }));
     handle_touch(state_setter_ptr);
 }
 
