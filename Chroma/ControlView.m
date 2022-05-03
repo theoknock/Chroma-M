@@ -6,6 +6,9 @@
 //
 
 #import "ControlView.h"
+#include <stdio.h>   /* for printf */
+#include <stdarg.h>  /* for va_arg, va_start,
+                        va_list, va_end */
 
 @implementation ControlView
 
@@ -22,23 +25,66 @@ static int (^validate_range)(int, int, int) = ^ int (int min, int max, int val) 
     return maximum(min, minimum(val, max));
 };
 
-static CGPoint (^button_center_point)(const unsigned long) = ^ CGPoint (const unsigned long button_tag) {
+CGPoint (^button_center_point_va)(const char *fmt, ...) = ^ CGPoint (const char *fmt, ...) {
+    __block va_list ap;
+    va_start(ap, fmt);
     return ^ (float * angle_t, float * radius_t) {
-        ((active_component_bit_vector & BUTTON_ARC_COMPONENT_BIT_MASK) && (^ long {
-            *angle_t = rescale(button_tag, 0.0, 4.0, 180.0, 270.0);
-            return TRUE_BIT;
-        }()));
+        const char * fmt_block = fmt;
+    
+    while (* fmt_block)
+    {
+        switch (*fmt_block)
+        {
+            case '%':
+                fmt_block++;
+                if (*fmt_block == 'd')
+                {
+                    int button_tag = va_arg(ap, int);
+                    printf("<%d> is an integer\n", button_tag);
+                    ((active_component_bit_vector & BUTTON_ARC_COMPONENT_BIT_MASK) && (^ long {
+                        *angle_t = rescale(button_tag, CaptureDeviceConfigurationControlPropertyTorchLevel, CaptureDeviceConfigurationControlPropertyVideoZoomFactor, arc_range[0], arc_range[1]);
+                        return TRUE_BIT;
+                    }()));
+                }
+                else if (*fmt_block == 'f')
+                {
+                    char *s = va_arg(ap, char*);
+                    printf("<%f> is a float\n", s);
+                }
+                else {
+                    printf("%%%c is an unknown format\n",
+                           *fmt_block);
+                }
+                fmt_block++;
+                break;
+            default:
+                printf("%c is unknown\n", *fmt_block);
+                fmt_block++;
+                break;
+        } }
+    va_end(ap);
         float radians = ((*angle_t) * kRadians_f);
         return CGPointMake(center_point.x - (*radius_t) * -cos(radians), center_point.y - (*radius_t) * -sin(radians));
     }(&angle, &radius);
 };
 
-static CGPoint (^point_from_angle)(const float) = ^ CGPoint (const float button_angle) {
-    return ^ (float * angle_t, float * radius_t) {
-        float radians = ((*angle_t) * kRadians_f);
-        return CGPointMake(center_point.x - (*radius_t) * -cos(radians), center_point.y - (*radius_t) * -sin(radians));
-    }(&button_angle, &radius);
-};
+//static CGPoint (^button_center_point)(const unsigned long) = ^ CGPoint (const unsigned long button_tag) {
+//    return ^ (float * angle_t, float * radius_t) {
+//        ((active_component_bit_vector & BUTTON_ARC_COMPONENT_BIT_MASK) && (^ long {
+//            *angle_t = rescale(button_tag, CaptureDeviceConfigurationControlPropertyTorchLevel, CaptureDeviceConfigurationControlPropertyVideoZoomFactor, arc_range[0], arc_range[1]);
+//            return TRUE_BIT;
+//        }()));
+//        float radians = ((*angle_t) * kRadians_f);
+//        return CGPointMake(center_point.x - (*radius_t) * -cos(radians), center_point.y - (*radius_t) * -sin(radians));
+//    }(&angle, &radius);
+//};
+//
+//static CGPoint (^point_from_angle)(const float) = ^ CGPoint (const float button_angle) {
+//    return ^ (float * angle_t, float * radius_t) {
+//        float radians = ((*angle_t) * kRadians_f);
+//        return CGPointMake(center_point.x - (*radius_t) * -cos(radians), center_point.y - (*radius_t) * -sin(radians));
+//    }(&button_angle, &radius);
+//};
 
 static float (^angle_from_point)(CGPoint) = ^ (CGPoint point) {
     return ^ (float * angle_t) {
@@ -67,6 +113,8 @@ static const void (^(^tick_wheel_renderer)(void))(CGContextRef, CGRect) = ^{
                     CGContextTranslateCTM(ctx, CGRectGetMinX(rect), CGRectGetMinY(rect));
                     (recursive_block = ^ unsigned long (unsigned long t) {
                         float radians = t * kRadians_f;
+                        
+//                        (a & b) | (~a & c)
                         float tick_height = (t == arc_range[0] || t == arc_range[1]) ? 9.0 : (t % (unsigned int)round((arc_range[1] - arc_range[0]) / 9.0) == 0) ? 6.0 : 3.0;
                         {
                             CGPoint xy_outer = CGPointMake(((*radius_t + tick_height) * cosf(radians)),
@@ -77,8 +125,9 @@ static const void (^(^tick_wheel_renderer)(void))(CGContextRef, CGRect) = ^{
                             CGContextSetLineWidth(ctx, (t == arc_range[0] || t == arc_range[1]) ? 2.0 : (t % 9 == 0) ? 1.0 : 0.625);
                             CGContextMoveToPoint(ctx, xy_outer.x + CGRectGetMaxX(rect), xy_outer.y + CGRectGetMaxY(rect));
                             CGContextAddLineToPoint(ctx, xy_inner.x + CGRectGetMaxX(rect), xy_inner.y + CGRectGetMaxY(rect));
+                            CGContextStrokePath(ctx);
                         };
-                        CGContextStrokePath(ctx);
+                        
                         UIGraphicsEndImageContext();
                         t++;
                         return (unsigned long)(t ^ (unsigned long)arc_range[1]) && (unsigned long)(recursive_block)(t);
@@ -110,11 +159,11 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
             return ^ unsigned long (unsigned long state) {
                 
                 ^ unsigned long (unsigned long state) {
-                    iterate(&buttons, 5)(^ (id button) {
+                    iterate(&buttons, CaptureDeviceConfigurationControlPropertyAll)(^ (id button) {
                         [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
                         [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
                         [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
-                        [(UIButton *)button setCenter:button_center_point(((UIButton *)button).tag)];
+                        [(UIButton *)button setCenter:button_center_point_va("%d", (((UIButton *)button).tag))];
                     });
                     [view setNeedsDisplay];
                     return state;
@@ -133,13 +182,12 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
                     __block int angle_offset = 360.0 / frame_count;
                     (integrate((unsigned long)frame_count)(^ (unsigned long frame, BOOL * STOP) {
                         int degrees = (int)round((angle_offset * frame) % 360);
-                        iterate(&buttons, 5)(^ (UIButton * button) {
+                        return iterate(&buttons, CaptureDeviceConfigurationControlPropertyAll)(^ (UIButton * button) {
                             [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
                             [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
                             [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
-                            [(UIButton *)button setCenter:point_from_angle(((int)angle_from_point(button_center_point(((UIButton *)button).tag)) + degrees))];
+                            [(UIButton *)button setCenter:button_center_point_va("%f", (((int)angle_from_point(button_center_point_va("%d", (((UIButton *)button).tag))) + degrees)))];
                         });
-                        return frame;
                     }));
                     return TRUE_BIT;
                 }())))));
@@ -151,8 +199,31 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
     };
 };
 
+
+
+
 - (void)awakeFromNib {
     [super awakeFromNib];
+    
+    
+    
+    //    int (^system_w_printf)(char const *fmt, ...) __attribute__ ((format (printf,1,2)));
+    //
+    //    system_w_printf = 	^ (char const *fmt, ...) {
+    //        char *cmd;
+    //        va_list argp;
+    //        va_start(argp, fmt);
+    //        vasprintf(&cmd, fmt, argp);
+    //        va_end(argp);
+    ////        int out= system(cmd);
+    //        free(cmd);
+    //        return (1);
+    //    };
+    //
+    //    char argv = 'hjk';
+    //
+    //    system_w_printf("ls %s", argv);
+    
     typeof(^{}) predicate = ^{
         printf("predicate\n");
     };
@@ -169,7 +240,7 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
     radius_range[0] = CGRectGetMidX(((ControlView *)self).bounds);
     radius_range[1] = center_point.x;
     
-    printf("map == %lu\n", map(&buttons, 5)(^ const void * (const unsigned long index) {
+    printf("map == %lu\n", map(&buttons, CaptureDeviceConfigurationControlPropertyAll)(^ const void * (const unsigned long index) {
         __block UIButton * button;
         [button = [UIButton new] setTag:index];
         [button setImage:[UIImage systemImageNamed:CaptureDeviceConfigurationControlPropertyImageValues[0][index] withConfiguration:CaptureDeviceConfigurationControlPropertySymbolImageConfiguration(CaptureDeviceConfigurationControlStateDeselected)] forState:UIControlStateNormal];
@@ -202,13 +273,13 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
         objc_setAssociatedObject(button, @selector(invoke), eventHandlerBlockTouchUpInside, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [button addTarget:eventHandlerBlockTouchUpInside action:@selector(invoke) forControlEvents:UIControlEventTouchUpInside];
         
-        CGPoint target_center = button_center_point(index);
+        CGPoint target_center = button_center_point_va("%d", index);
         [button setCenter:target_center];
         [self addSubview:button];
         
         return (const id *)CFBridgingRetain(button);
     }));
-
+    
     touch_handler = touch_handler_init((ControlView *)self);
 }
 

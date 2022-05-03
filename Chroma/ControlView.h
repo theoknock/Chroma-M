@@ -153,7 +153,7 @@ static UIImage * (^CaptureDeviceConfigurationControlPropertySymbolImage)(Capture
     return [UIImage systemImageNamed:CaptureDeviceConfigurationControlPropertySymbol(property, state) withConfiguration:CaptureDeviceConfigurationControlPropertySymbolImageConfiguration(state)];
 };
 
-static __strong id _Nonnull buttons[5];
+static __strong id _Nonnull buttons[CaptureDeviceConfigurationControlPropertyAll];
 
 static unsigned long (^(^map)(id _Nonnull * _Nonnull, const unsigned long))(const void *(^__strong)(const unsigned long)) = ^ (id * _Nonnull obj_collection, const unsigned long index_count) {
     __block unsigned long (^recursive_block)(unsigned long);

@@ -23,6 +23,7 @@
     self.mtkView.backgroundColor = UIColor.blackColor;
     [self.mtkView setDevice:self.mtkView.preferredDevice];
     [self.mtkView setFramebufferOnly:FALSE];
+    self.mtkView.preferredFramesPerSecond = 60;
     
     _renderer = [[Renderer alloc] initWithMetalKitView:self.mtkView];
     
