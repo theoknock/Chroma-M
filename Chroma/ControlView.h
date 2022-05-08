@@ -153,7 +153,9 @@ static UIImage * (^CaptureDeviceConfigurationControlPropertySymbolImage)(Capture
     return [UIImage systemImageNamed:CaptureDeviceConfigurationControlPropertySymbol(property, state) withConfiguration:CaptureDeviceConfigurationControlPropertySymbolImageConfiguration(state)];
 };
 
-static __strong id _Nonnull buttons[CaptureDeviceConfigurationControlPropertyAll];
+//static __strong id _Nonnull buttons[CaptureDeviceConfigurationControlPropertyAll];
+typedef typeof(UIButton *) buttons[CaptureDeviceConfigurationControlPropertyAll];
+typeof(buttons) buttons_ptr[CaptureDeviceConfigurationControlPropertyAll];
 
 static unsigned long (^(^map)(id _Nonnull * _Nonnull, const unsigned long))(const void *(^__strong)(const unsigned long)) = ^ (id * _Nonnull obj_collection, const unsigned long index_count) {
     __block unsigned long (^recursive_block)(unsigned long);
@@ -177,38 +179,12 @@ static unsigned long (^(^iterate)(id _Nonnull * _Nonnull, const unsigned long))(
     };
 };
 
-static OSQueueHead PredFuncPtrQueue = OS_ATOMIC_QUEUE_INIT;
-
-struct PredFuncPtrStruct
-{
-    typeof(void(^*)(void)) predicate_t;
-    typeof(void(^*)(void)) function_t;
-    typeof(void(^*)(void)) block_t;
-};
-
-static void (^test_predicate_functions)(typeof(void(^)(void)), typeof(void(^)(void)), typeof(void(^)(void))) = ^ (typeof(void(^)(void)) predicate, typeof(void(^)(void)) function, typeof(void(^)(void)) block) {
-    (predicate)();
-    (function)();
-    (block)();
-    struct PredFuncPtrStruct * predicate_function_enqueue = malloc(sizeof(struct PredFuncPtrStruct));
-    predicate_function_enqueue->predicate_t = Block_copy((typeof(void(^*)(void)))CFBridgingRetain(predicate));
-    predicate_function_enqueue->function_t  = Block_copy((typeof(void(^*)(void)))CFBridgingRetain(function));
-    predicate_function_enqueue->block_t  = Block_copy((typeof(void(^*)(void)))CFBridgingRetain(block));
-    OSAtomicEnqueue(&PredFuncPtrQueue, predicate_function_enqueue, sizeof(struct PredFuncPtrStruct));
-    struct PredFuncPtrStruct * predicate_function_dequeue = OSAtomicDequeue(&PredFuncPtrQueue, sizeof(struct PredFuncPtrStruct));
-    ((const void(^)(void))CFBridgingRelease(predicate_function_dequeue->predicate_t))();
-    ((const void(^)(void))CFBridgingRelease(predicate_function_dequeue->function_t))();
-    ((const void(^)(void))CFBridgingRelease(predicate_function_dequeue->block_t))();
-};
-
 static OSQueueHead IntegrandsAtomicQueue = OS_ATOMIC_QUEUE_INIT;
 struct IntegrandsStruct
 {
-    unsigned long (^ _Nonnull __strong (*integrand_t))(void);
+    unsigned long (^ _Nonnull __strong (* _Nonnull integrand_t))(void);
 };
 
-
-//static unsigned long (^ __strong integrand)(unsigned long, BOOL *);
 static unsigned long (^(^integrate)(unsigned long))(unsigned long (^ __strong )(unsigned long, BOOL *)) = ^ (unsigned long frame_count) {
     __block typeof(CADisplayLink *) display_link;
     __block unsigned long frames = ~(1 << (frame_count + 1));
@@ -237,9 +213,7 @@ static unsigned long (^(^integrate)(unsigned long))(unsigned long (^ __strong )(
             });
             return (const id *)(integrands_t);
         }((id *)&integrands_ptr));
-        
-        
-        
+  
         display_link = [CADisplayLink displayLinkWithTarget:^{
             frames >>= 1;
             ((frames & 1) && (^ long {
