@@ -17,42 +17,45 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <mtkView contentMode="scaleToFill" colorPixelFormat="BGRA8Unorm" depthStencilPixelFormat="Depth32Float" paused="YES" enableSetNeedsDisplay="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SUj-s8-6hC">
-                                <rect key="frame" x="0.0" y="44" width="414" height="818"/>
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                             </mtkView>
                             <view opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WQ1-3Z-YBb" customClass="ControlView">
                                 <rect key="frame" x="0.0" y="448" width="414" height="414"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" secondItem="WQ1-3Z-YBb" secondAttribute="height" multiplier="1:1" id="jGR-XU-iNA"/>
-                                </constraints>
                             </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="cvH-CB-P4o"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="SUj-s8-6hC" firstAttribute="leading" secondItem="cvH-CB-P4o" secondAttribute="leading" id="1dJ-Kz-9ei"/>
-                            <constraint firstItem="SUj-s8-6hC" firstAttribute="top" secondItem="cvH-CB-P4o" secondAttribute="top" id="6Cd-Ua-Ko0"/>
-                            <constraint firstItem="SUj-s8-6hC" firstAttribute="width" secondItem="cvH-CB-P4o" secondAttribute="width" id="9sP-Tv-4CT"/>
+                            <constraint firstItem="SUj-s8-6hC" firstAttribute="leading" secondItem="Lps-Xh-Cj1" secondAttribute="leading" id="1dJ-Kz-9ei"/>
+                            <constraint firstItem="SUj-s8-6hC" firstAttribute="top" secondItem="Lps-Xh-Cj1" secondAttribute="top" id="6Cd-Ua-Ko0"/>
+                            <constraint firstItem="WQ1-3Z-YBb" firstAttribute="height" secondItem="cvH-CB-P4o" secondAttribute="width" id="7Kt-7V-LGm"/>
+                            <constraint firstItem="SUj-s8-6hC" firstAttribute="width" secondItem="Lps-Xh-Cj1" secondAttribute="width" id="9sP-Tv-4CT"/>
                             <constraint firstItem="WQ1-3Z-YBb" firstAttribute="width" secondItem="cvH-CB-P4o" secondAttribute="width" id="DCZ-7B-VgL"/>
                             <constraint firstItem="WQ1-3Z-YBb" firstAttribute="trailing" secondItem="cvH-CB-P4o" secondAttribute="trailing" id="Mus-Z0-JtN"/>
-                            <constraint firstItem="SUj-s8-6hC" firstAttribute="bottom" secondItem="cvH-CB-P4o" secondAttribute="bottom" id="N2L-vt-b1p"/>
+                            <constraint firstItem="SUj-s8-6hC" firstAttribute="bottom" secondItem="Lps-Xh-Cj1" secondAttribute="bottom" id="N2L-vt-b1p"/>
                             <constraint firstItem="WQ1-3Z-YBb" firstAttribute="height" secondItem="cvH-CB-P4o" secondAttribute="height" identifier="ControlViewLandscapeHeighConstraint" id="Txw-A8-Wak"/>
-                            <constraint firstItem="SUj-s8-6hC" firstAttribute="trailing" secondItem="cvH-CB-P4o" secondAttribute="trailing" id="oRS-30-71N"/>
+                            <constraint firstItem="WQ1-3Z-YBb" firstAttribute="width" secondItem="cvH-CB-P4o" secondAttribute="height" id="hrc-Yj-lhO"/>
+                            <constraint firstItem="SUj-s8-6hC" firstAttribute="trailing" secondItem="Lps-Xh-Cj1" secondAttribute="trailing" id="oRS-30-71N"/>
                             <constraint firstItem="WQ1-3Z-YBb" firstAttribute="bottom" secondItem="cvH-CB-P4o" secondAttribute="bottom" id="sYT-tB-9Lf"/>
                         </constraints>
                         <variation key="default">
                             <mask key="constraints">
+                                <exclude reference="7Kt-7V-LGm"/>
                                 <exclude reference="DCZ-7B-VgL"/>
                                 <exclude reference="Txw-A8-Wak"/>
+                                <exclude reference="hrc-Yj-lhO"/>
                             </mask>
                         </variation>
                         <variation key="heightClass=compact-widthClass=regular">
                             <mask key="constraints">
                                 <include reference="Txw-A8-Wak"/>
+                                <include reference="hrc-Yj-lhO"/>
                             </mask>
                         </variation>
                         <variation key="heightClass=regular-widthClass=compact">
                             <mask key="constraints">
+                                <include reference="7Kt-7V-LGm"/>
                                 <include reference="DCZ-7B-VgL"/>
                             </mask>
                         </variation>

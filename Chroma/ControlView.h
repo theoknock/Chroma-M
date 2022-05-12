@@ -43,12 +43,12 @@ static const unsigned long (^ _Nullable const (* _Nullable restrict state_setter
 static CGPoint center_point;
 
 static float radius;
-static float * const radius_t = &radius;
+static float * radius_t = &radius;
 static float radius_range[2];
 
 static float angle;
-static float * const angle_t = &angle;
-static const float arc_range[2] = {180.0, 270.0};
+static float * angle_t = &angle;
+static float arc_range[2];
 
 static const float kPi_f      = (float)(M_PI);
 static const float k1Div180_f = 1.0f / 180.0f;
