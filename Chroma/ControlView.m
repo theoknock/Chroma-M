@@ -76,20 +76,20 @@ CGPoint (^button_center_point)(typeof(parameter)) = ^ CGPoint (typeof(parameter)
 //};
 
 static float (^angle_from_point)(CGPoint) = ^ (CGPoint point) {
-    return ^ (float * angle_t) {
-        *angle_t = (atan2(point.y - center_point.y, point.x - center_point.x)) * (arc_range[1] / M_PI);
+    return ^{
+        *angle_t = (atan2(point.y - center_point.y, point.x - center_point.x)) * (arc_range[0] / M_PI);
         (*angle_t < 0.0) && (*angle_t = *angle_t + 360.0);
-        *angle_t = validate_range(arc_range[1], arc_range[0], *angle_t);
+        *angle_t = validate_range(arc_range[0], arc_range[1], *angle_t);
         return *angle_t;
-    }(angle_t);
+    }();
 };
 
 static float (^radius_from_point)(CGPoint) = ^ (CGPoint point) {
-    return ^ (float * radius_t) {
+    return ^{
         *radius_t = sqrt(pow(point.x - center_point.x, 2.0) + pow(point.y - center_point.y, 2.0));
         *radius_t = validate_range(radius_range[1], radius_range[0], *radius_t);
         return *radius_t;
-    }(&radius);
+    }();
 };
 
 static const void (^(^tick_wheel_renderer)(void))(CGContextRef, CGRect) = ^{
@@ -134,7 +134,7 @@ static const void (^ const (* restrict draw_tick_wheel_t))(CGContextRef, CGRect)
 static unsigned long (^(^_Nonnull touch_handler)(__strong UITouch * _Nullable))(const unsigned long (^ const (* _Nullable restrict))(unsigned long));
 static unsigned long (^ _Nonnull  handle_touch)(const unsigned long (^ const (* _Nullable restrict))(unsigned long));
 static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__strong UITouch * _Nullable))(const unsigned long (^ const (* _Nullable restrict))(unsigned long)) = ^ (const ControlView * __strong view) {
-    __block volatile unsigned long touch_property;
+    static unsigned long touch_property;
     draw_tick_wheel = tick_wheel_renderer();
     
     return ^ (__strong UITouch * _Nullable touch) {
@@ -209,59 +209,89 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
             
 //
             
-            [(ControlView *)view setNeedsDisplay];
             
-            ^ unsigned long (unsigned long block_3) {
-                printf("touch_property == %d\n", round(rescale(angle, arc_range[0], arc_range[1], CaptureDeviceConfigurationControlPropertyTorchLevel, CaptureDeviceConfigurationControlPropertyVideoZoomFactor)));
+            
+            
+//            ^ unsigned long (unsigned long block_3) {
+//                printf("touch_property == %d\n", round(rescale(angle, arc_range[0], arc_range[1], CaptureDeviceConfigurationControlPropertyTorchLevel, CaptureDeviceConfigurationControlPropertyVideoZoomFactor)));
+//                return iterate(&buttons_ptr, CaptureDeviceConfigurationControlPropertyAll)(^ (id button) {
+//                    [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//                    [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//                    [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//                    [(UIButton *)button setCenter:button_center_point((typeof(parameter)){ .type = INT_PARAMETER_TYPE, .value = (int)((UIButton *)button).tag })];
+//                });
+//            }(^ unsigned long (unsigned long block_2) {
+//                return (active_component_bit_vector & BUTTON_ARC_COMPONENT_BIT_MASK) && (highlighted_property_bit_vector = (1UL << (touch_property = (unsigned int)round(rescale(angle, arc_range[0], arc_range[1], CaptureDeviceConfigurationControlPropertyTorchLevel, CaptureDeviceConfigurationControlPropertyVideoZoomFactor)))));
+//            }(^ unsigned long (unsigned long block_1) {
+//                printf("block_1_i\n");
+//                return ^ unsigned long (CGPoint touch_point) {
+//                    touch_point.x = validate_range(CGRectGetMinX(view.bounds), center_point.x, touch_point.x);
+//                    touch_point.y = validate_range(CGRectGetMaxY(view.bounds) - CGRectGetWidth(view.bounds), center_point.y, touch_point.y);
+//                    radius_from_point(touch_point);
+//                    angle_from_point(touch_point);
+//                    printf("touch_point.x == %f\n", touch_point.x);
+//                    return block_1;
+//                }([touch preciseLocationInView:touch.view]);
+//            }(^ unsigned long { return (unsigned long)(((unsigned long)0 | (unsigned long)state_setter_t)) && (*state_setter_t)(^ unsigned long {
+//                const unsigned long frame_count = 30;
+//                __block int angle_offset = 360.0 / frame_count;
+//                return integrate((unsigned long)frame_count)(^ unsigned long (unsigned long frame, BOOL * STOP) {
+//                    int degrees = (int)round((angle_offset * frame) % 360);
+//                    return iterate(&buttons_ptr, CaptureDeviceConfigurationControlPropertyAll)(^ (UIButton * button) {
+//                        [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//                        [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//                        [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//                        [(UIButton *)button setCenter:button_center_point((typeof(parameter)){ .type = FLOAT_PARAMETER_TYPE, .value = (float)(rescale(((UIButton *)button).tag, CaptureDeviceConfigurationControlPropertyTorchLevel, CaptureDeviceConfigurationControlPropertyVideoZoomFactor, arc_range[0], arc_range[1])) + degrees })];
+//                    });
+//                });
+//            }());
+//            }())));
+            
+//            (^ unsigned long {
+//                return (unsigned long)(((unsigned long)0 | (unsigned long)state_setter_t)) && (*state_setter_t)(^ unsigned long {
+//                    const unsigned long frame_count = 30;
+//                    __block int angle_offset = 360.0 / frame_count;
+//                    return integrate((unsigned long)frame_count)(^ unsigned long (unsigned long frame, BOOL * STOP) {
+//                        int degrees = (int)round((angle_offset * frame) % 360);
+//                        return iterate(&buttons_ptr, CaptureDeviceConfigurationControlPropertyAll)(^ (UIButton * button) {
+//                            [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//                            [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//                            [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
+//                            [(UIButton *)button setCenter:button_center_point((typeof(parameter)){ .type = FLOAT_PARAMETER_TYPE, .value = (float)(rescale(((UIButton *)button).tag, CaptureDeviceConfigurationControlPropertyTorchLevel, CaptureDeviceConfigurationControlPropertyVideoZoomFactor, arc_range[0], arc_range[1])) + degrees })];
+//                        });
+//                    });
+//                }());
+//            }());
+            
+            
+            
+            (^ unsigned long (unsigned long block_1) {
+                return ^ unsigned long (CGPoint touch_point) {
+                    touch_point.x = validate_range(CGRectGetMinX(view.bounds), center_point.x, touch_point.x);
+                    touch_point.y = validate_range(CGRectGetMaxY(view.bounds) - CGRectGetWidth(view.bounds), center_point.y, touch_point.y);
+                    radius_from_point(touch_point);
+                    angle_from_point(touch_point);
+                    return block_1;
+                }([touch preciseLocationInView:touch.view]);
+            }(TRUE_BIT));
+            
+            printf("touch_property == %lu\n", (^ unsigned long (unsigned long block_2) {
+                return (active_component_bit_vector & BUTTON_ARC_COMPONENT_BIT_MASK) && (highlighted_property_bit_vector = (1UL << (touch_property = (unsigned int)round(rescale(*angle_t, arc_range[1], arc_range[0], CaptureDeviceConfigurationControlPropertyTorchLevel, CaptureDeviceConfigurationControlPropertyVideoZoomFactor)))));
+            }(TRUE_BIT)));
+            
+            (^ unsigned long (unsigned long block_3) {
+                printf("touch_property == %lu\n", (unsigned int)round(rescale(*angle_t, arc_range[0], arc_range[1], CaptureDeviceConfigurationControlPropertyTorchLevel, CaptureDeviceConfigurationControlPropertyVideoZoomFactor)));
                 return iterate(&buttons_ptr, CaptureDeviceConfigurationControlPropertyAll)(^ (id button) {
                     [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
                     [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
                     [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
                     [(UIButton *)button setCenter:button_center_point((typeof(parameter)){ .type = INT_PARAMETER_TYPE, .value = (int)((UIButton *)button).tag })];
                 });
-            }(^ unsigned long (unsigned long block_2) {
-                return (active_component_bit_vector & BUTTON_ARC_COMPONENT_BIT_MASK) && (highlighted_property_bit_vector = (1UL << (touch_property = (unsigned int)round(rescale(angle, arc_range[0], arc_range[1], CaptureDeviceConfigurationControlPropertyTorchLevel, CaptureDeviceConfigurationControlPropertyVideoZoomFactor)))));
-            }(^ unsigned long (unsigned long block_1) {
-                printf("block_1_i\n");
-                return ^ unsigned long (CGPoint touch_point) {
-                    touch_point.x = validate_range(CGRectGetMinX(view.bounds), center_point.x, touch_point.x);
-                    touch_point.y = validate_range(CGRectGetMaxY(view.bounds) - CGRectGetWidth(view.bounds), center_point.y, touch_point.y);
-                    radius_from_point(touch_point);
-                    angle_from_point(touch_point);
-                    printf("touch_point.x == %f\n", touch_point.x);
-                    return block_1;
-                }([touch preciseLocationInView:touch.view]);
-            }(^ unsigned long { return (unsigned long)(((unsigned long)0 | (unsigned long)state_setter_t)) && (*state_setter_t)(^ unsigned long {
-                const unsigned long frame_count = 30;
-                __block int angle_offset = 360.0 / frame_count;
-                return integrate((unsigned long)frame_count)(^ unsigned long (unsigned long frame, BOOL * STOP) {
-                    int degrees = (int)round((angle_offset * frame) % 360);
-                    return iterate(&buttons_ptr, CaptureDeviceConfigurationControlPropertyAll)(^ (UIButton * button) {
-                        [(UIButton *)button setHighlighted:(highlighted_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
-                        [(UIButton *)button setSelected:(selected_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
-                        [(UIButton *)button setHidden:(hidden_property_bit_vector >> ((UIButton *)button).tag) & 1UL];
-                        [(UIButton *)button setCenter:button_center_point((typeof(parameter)){ .type = FLOAT_PARAMETER_TYPE, .value = (float)(rescale(((UIButton *)button).tag, CaptureDeviceConfigurationControlPropertyTorchLevel, CaptureDeviceConfigurationControlPropertyVideoZoomFactor, arc_range[0], arc_range[1])) + degrees })];
-                    });
-                });
-            }());
-            }())));
+            }(TRUE_BIT));
+            
+            [(ControlView *)view setNeedsDisplay];
             
             return TRUE_BIT;
-            
-            /*
-             block
-                block_1_i
-                block_1_r
-                    block_2_i
-                    block_2_r
-                        block_2a_i
-                        block_2a_r
-                            block_2b_i
-                            block_2b_r
-                        block_3_i
-                        block_3_r
-             */
-            
             
             
         };
@@ -307,7 +337,7 @@ static unsigned long (^(^(^touch_handler_init)(const ControlView * __strong))(__
         
         return (const id *)CFBridgingRetain(button);
     });
-   
+    
     touch_handler = touch_handler_init((ControlView *)self);
 }
 

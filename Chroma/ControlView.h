@@ -154,7 +154,7 @@ static UIImage * (^CaptureDeviceConfigurationControlPropertySymbolImage)(Capture
 };
 
 //static __strong id _Nonnull buttons[CaptureDeviceConfigurationControlPropertyAll];
-typedef typeof(UIButton *) buttons[CaptureDeviceConfigurationControlPropertyAll];
+typeof(UIButton *) buttons[CaptureDeviceConfigurationControlPropertyAll];
 typeof(buttons) buttons_ptr[CaptureDeviceConfigurationControlPropertyAll];
 
 static unsigned long (^(^map)(id _Nonnull * _Nonnull, const unsigned long))(const void *(^__strong)(const unsigned long)) = ^ (id * _Nonnull obj_collection, const unsigned long index_count) {
